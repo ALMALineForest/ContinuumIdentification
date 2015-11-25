@@ -1,3 +1,5 @@
+threshold_mfs = '2.0mJy'
+threshold_freq = '5.0mJy'
 import os
 if not os.path.exists('test_frequency.image.fits'):
     os.system('rm -rf w51_test_merge_spw3_copy.ms')
@@ -7,7 +9,7 @@ if not os.path.exists('test_frequency.image.fits'):
     clean(vis='w51_test_merge_spw3_copy.ms', imagename="test_frequency",
           field="", spw='', mode='channel', outframe='LSRK',
           interpolation='linear', imagermode='mosaic', interactive=False,
-          niter=50000, threshold='2.0mJy', imsize=[512,512], cell='0.052arcsec',
+          niter=50000, threshold=threshold_freq, imsize=[512,512], cell='0.052arcsec',
           weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
           pbcor=False, usescratch=False, robust=1.0)
     exportfits('test_frequency.image', 'test_frequency.image.fits', dropdeg=True, overwrite=True)
@@ -19,7 +21,7 @@ if not os.path.exists('test_frequency.image.fits'):
     clean(vis='w51_test_merge_spw3_copy.ms', imagename="test_mfs",
           field="", spw='', mode='mfs', outframe='LSRK',
           interpolation='linear', imagermode='mosaic', interactive=False,
-          niter=10000, threshold='5.0mJy', imsize=[512,512], cell='0.052arcsec',
+          niter=50000, threshold=threshold_mfs, imsize=[512,512], cell='0.052arcsec',
           weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
           pbcor=False, usescratch=False, robust=1.0)
     exportfits('test_mfs.image', 'test_mfs.image.fits', dropdeg=True, overwrite=True)
@@ -31,6 +33,8 @@ if not os.path.exists('test_frequency.image.fits'):
 import numpy as np
 import spectral_cube
 from astropy import units as u
+from astropy.io import fits
+from astropy import wcs
 # cube = spectral_cube.SpectralCube.read('test_frequency.image.fits').with_spectral_unit(u.Hz)
 # cont = cube.min(axis=0)
 # contsub = cube-cont
@@ -53,7 +57,7 @@ contsub = cubedata - cont
 header = cubeheader = fits.getheader('test_frequency.image.fits')
 #hdu = cont.hdu
 #ppbeam = header['BMAJ']*header['BMIN']*2*np.pi/2.35**2/header['CDELT2']**2
-hdu = fits.PrimaryHDU(data=cont, header=header)
+hdu = fits.PrimaryHDU(data=contsub, header=header)
 # this scaling may be necessary if setjy is used
 #hdu.data *= ppbeam # because apparently CASA divides by this?
 hdu.writeto('test_contsub_cube.fits', clobber=True)
@@ -82,10 +86,10 @@ split('w51_test_merge_spw3_copy.ms', 'w51_test_merge_spw3_copy_linecubesub.ms', 
 im.open('w51_test_merge_spw3_copy_linecubesub.ms')
 from astropy import coordinates
 c = coordinates.SkyCoord(header['CRVAL1'], header['CRVAL2'], unit=('deg','deg'), frame='fk5')
-im.defineimage(nx=cube.shape[1],
+im.defineimage(nx=cubedata.shape[1],
                cellx='{0}arcsec'.format(header['CDELT2']*3600),
                mode='channel',
-               nchan=cube.shape[0],
+               nchan=cubedata.shape[0],
                phasecenter='J2000 {0} {1}'.format(c.ra.to_string(),
                                                   c.dec.to_string())),
 os.system('rm -rf model_contsubcube')
@@ -103,15 +107,29 @@ im.close()
 
 uvsub('w51_test_merge_spw3_copy_linecubesub.ms')
 
+os.system('rm -rf test_mfs_linecubesub.*')
+clean(vis='w51_test_merge_spw3_copy_linecubesub.ms', imagename="test_mfs_linecubesub",
+      field="", spw='', mode='mfs', outframe='LSRK',
+      interpolation='linear', imagermode='mosaic', interactive=False,
+      niter=50000, threshold=threshold_mfs, imsize=[512,512], cell='0.052arcsec',
+      weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
+      pbcor=False, usescratch=False, robust=1.0)
+exportfits('test_mfs_linecubesub.image', 'test_mfs_linecubesub.image.fits', dropdeg=True, overwrite=True)
+exportfits('test_mfs_linecubesub.model', 'test_mfs_linecubesub.model.fits', dropdeg=True, overwrite=True)
+for suffix in ('image','model','flux','psf','residual'):
+    os.system('rm -rf test_mfs_linecubesub.{0}'.format(suffix))
+
+
 os.system('rm -rf test_frequency_linecubesub.*')
 clean(vis='w51_test_merge_spw3_copy_linecubesub.ms', imagename="test_frequency_linecubesub",
       field="", spw='', mode='channel', outframe='LSRK',
       interpolation='linear', imagermode='mosaic', interactive=False,
-      niter=10000, threshold='50.0mJy', imsize=[512,512], cell='0.052arcsec',
+      niter=50000, threshold=threshold_freq, imsize=[512,512], cell='0.052arcsec',
       weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
-      pbcor=False, usescratch=True, robust=1.0)
+      pbcor=False, usescratch=False, robust=1.0)
 exportfits('test_frequency_linecubesub.image', 'test_frequency_linecubesub.image.fits', dropdeg=True, overwrite=True)
 exportfits('test_frequency_linecubesub.model', 'test_frequency_linecubesub.model.fits', dropdeg=True, overwrite=True)
 for suffix in ('image','model','flux','psf','residual'):
     os.system('rm -rf test_frequency_linecubesub.{0}'.format(suffix))
+
 

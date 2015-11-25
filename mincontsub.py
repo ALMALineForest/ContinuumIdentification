@@ -1,3 +1,6 @@
+threshold_mfs = '2.0mJy'
+threshold_freq = '5.0mJy'
+
 if not os.path.exists('test_frequency.image.fits'):
     os.system('rm -rf w51_test_merge_spw3_copy.ms')
     os.system('cp -r w51_test_merge_spw3.ms w51_test_merge_spw3_copy.ms')
@@ -6,7 +9,7 @@ if not os.path.exists('test_frequency.image.fits'):
     clean(vis='w51_test_merge_spw3_copy.ms', imagename="test_frequency",
           field="", spw='', mode='channel', outframe='LSRK',
           interpolation='linear', imagermode='mosaic', interactive=False,
-          niter=50000, threshold='2.0mJy', imsize=[512,512], cell='0.052arcsec',
+          niter=50000, threshold=threshold_freq, imsize=[512,512], cell='0.052arcsec',
           weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
           pbcor=False, usescratch=False, robust=1.0)
     exportfits('test_frequency.image', 'test_frequency.image.fits', dropdeg=True, overwrite=True)
@@ -18,7 +21,7 @@ if not os.path.exists('test_frequency.image.fits'):
     clean(vis='w51_test_merge_spw3_copy.ms', imagename="test_mfs",
           field="", spw='', mode='mfs', outframe='LSRK',
           interpolation='linear', imagermode='mosaic', interactive=False,
-          niter=10000, threshold='5.0mJy', imsize=[512,512], cell='0.052arcsec',
+          niter=50000, threshold=threshold_mfs, imsize=[512,512], cell='0.052arcsec',
           weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
           pbcor=False, usescratch=False, robust=1.0)
     exportfits('test_mfs.image', 'test_mfs.image.fits', dropdeg=True, overwrite=True)
@@ -98,7 +101,7 @@ os.system('rm -rf test_frequency_mincontsub.*')
 clean(vis='w51_test_merge_spw3_copy_imcont.ms', imagename="test_frequency_mincontsub",
       field="", spw='', mode='channel', outframe='LSRK',
       interpolation='linear', imagermode='mosaic', interactive=False,
-      niter=10000, threshold='50.0mJy', imsize=[512,512], cell='0.052arcsec',
+      niter=50000, threshold=threshold_freq, imsize=[512,512], cell='0.052arcsec',
       weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
       pbcor=False, usescratch=True, robust=1.0)
 exportfits('test_frequency_mincontsub.image', 'test_frequency_mincontsub.image.fits', dropdeg=True, overwrite=True)
@@ -123,7 +126,7 @@ os.system('rm -rf test_frequency_mincontsub-linecontsub.*')
 clean(vis='w51_test_merge_spw3_copy_imcont-linecont.ms', imagename="test_frequency_mincontsub-linecontsub",
       field="", spw='', mode='channel', outframe='LSRK',
       interpolation='linear', imagermode='mosaic', interactive=False,
-      niter=10000, threshold='50.0mJy', imsize=[512,512], cell='0.052arcsec',
+      niter=50000, threshold=threshold_freq, imsize=[512,512], cell='0.052arcsec',
       weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
       pbcor=False, usescratch=True, robust=1.0)
 exportfits('test_frequency_mincontsub-linecontsub.image', 'test_frequency_mincontsub-linecontsub.image.fits', dropdeg=True, overwrite=True)
@@ -135,7 +138,7 @@ os.system('rm -rf test_mfs_mincontsub-linecontsub.*')
 clean(vis='w51_test_merge_spw3_copy_imcont-linecont.ms', imagename="test_mfs_mincontsub-linecontsub",
       field="", spw='', mode='mfs', outframe='LSRK',
       interpolation='linear', imagermode='mosaic', interactive=False,
-      niter=10000, threshold='50.0mJy', imsize=[512,512], cell='0.052arcsec',
+      niter=50000, threshold=threshold_mfs, imsize=[512,512], cell='0.052arcsec',
       weighting='briggs', phasecenter='J2000 19h23m43.905 +14d30m28.08',
       pbcor=False, usescratch=True, robust=1.0)
 exportfits('test_mfs_mincontsub-linecontsub.image', 'test_mfs_mincontsub-linecontsub.image.fits', dropdeg=True, overwrite=True)
